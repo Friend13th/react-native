@@ -28,6 +28,11 @@ const Login = () => {
     setIsWrong(false);
     if (!email || !pass) {
       setIsWrong(true);
+    } else if (email === 'admin' && pass === '123') {
+      setIsWrong(false);
+      navigation.navigate('Home');
+    } else {
+      setIsWrong(true);
     }
   };
   return (
