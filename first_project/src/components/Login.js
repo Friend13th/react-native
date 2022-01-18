@@ -13,28 +13,35 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
+import {useForm, Controller} from 'react-hook-form';
+import {getAuth, signInWithEmailAndPassword} from '../firebase';
 
 const sourceLogo = require('../assets/Instagram_logo_white/Instagram_logo_white.png');
 
 const Login = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
+
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      email: '',
+      passWord: '',
+    },
+  });
   const [isWrong, setIsWrong] = useState(false);
-  const submit = (email, pass) => {
-    console.log('test asdas');
-    console.log({email});
-    console.log({pass});
-    setIsWrong(false);
-    if (!email || !pass) {
-      setIsWrong(true);
-    } else if (email === 'admin' && pass === '123') {
+  const onSubmit = data => {
+    console.log(data);
+    if (data.email === 'Test' && data.passWord === '123') {
       setIsWrong(false);
-      navigation.navigate('Home');
+      navigation.navigate('Home', data);
     } else {
       setIsWrong(true);
     }
   };
+
   return (
     <ScrollView
       contentContainerStyle={{flexGrow: 1}}
@@ -47,28 +54,46 @@ const Login = () => {
         <View style={styles.container}>
           <View style={styles.body}>
             <Image source={sourceLogo} style={styles.logo} />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Email"
-              placeholderTextColor="white"
-              onChangeText={emailValue => setEmail(emailValue)}
-              value={email}
+            <Controller
+              control={control}
+              // rules={{
+              //   required: true,
+              // }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Email"
+                  placeholderTextColor="white"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="email"
             />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Password"
-              placeholderTextColor="white"
-              secureTextEntry={true}
-              onChangeText={passWord => setPass(passWord)}
-              value={pass}
+            <Controller
+              control={control}
+              // rules={{required: true}}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Password"
+                  placeholderTextColor="white"
+                  onBlur={onBlur}
+                  secureTextEntry={true}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="passWord"
             />
             <TouchableOpacity
               style={styles.button}
-              onPress={() => submit(email, pass)}>
+              onPress={handleSubmit(onSubmit)}>
               <Text style={styles.loginText}>Login</Text>
             </TouchableOpacity>
             {isWrong && (
-              <Text style={{color: 'red'}}>Wrong email or passWord.</Text>
+              <Text style={styles.textError}>Wrong email or password.</Text>
             )}
             <Text>
               <Text style={styles.text}>Forgot your password? </Text>
@@ -151,6 +176,9 @@ const styles = StyleSheet.create({
   },
   textFooter: {
     margin: 20,
+  },
+  textError: {
+    color: 'red',
   },
 });
 export default Login;

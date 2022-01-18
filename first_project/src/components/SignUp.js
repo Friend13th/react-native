@@ -1,5 +1,6 @@
+/* eslint-disable no-undef */
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import {
   Button,
   Text,
@@ -12,16 +13,38 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import {useForm, Controller} from 'react-hook-form';
 
-const Login = () => {
+const sourceLogo = require('../assets/plus_photo.imageset/plus_photo2x.png');
+
+const SignUp = () => {
   const navigation = useNavigation();
-  const sourceLogo = require('../assets/plus_photo.imageset/plus_photo2x.png');
-  let email = '';
-  let pass = '';
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+      rePassword: '',
+      userName: '',
+      fullName: '',
+    },
+  });
+  const password = useRef({});
+  password.current = watch('password', '');
+
+  const onSubmit = data => {
+    console.log('test');
+    console.log(data);
+    console.log(password);
+  };
   return (
     <ScrollView
       contentContainerStyle={{flexGrow: 1}}
-      style={styles.scrolView}
       showsVerticalScrollIndicator={false}
       showsHorizontalScrollIndicator={false}>
       <LinearGradient
@@ -32,30 +55,111 @@ const Login = () => {
             <TouchableOpacity>
               <Image source={sourceLogo} style={styles.logo} />
             </TouchableOpacity>
-            <TextInput
-              placeholder="Email"
-              placeholderTextColor="white"
-              style={styles.textInput}
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Email"
+                  placeholderTextColor="white"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="email"
             />
-            <TextInput
-              style={styles.textInput}
-              placeholderTextColor="white"
-              placeholder="Password"
-              secureTextEntry={true}
+            {errors.email && <Text style={styles.textError}>Wrong email</Text>}
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                minLength: 6,
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholderTextColor="white"
+                  placeholder="Password"
+                  secureTextEntry={true}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="password"
             />
-            <TextInput
-              style={styles.textInput}
-              placeholderTextColor="white"
-              placeholder="Fullname"
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                validate: value =>
+                  value === password.current || 'The passwords do not match',
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholderTextColor="white"
+                  placeholder="Confirm password"
+                  secureTextEntry={true}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="rePassword"
             />
-            <TextInput
-              style={styles.textInput}
-              placeholderTextColor="white"
-              placeholder="Username"
+            {errors.rePassword && (
+              <Text style={styles.textError}>{errors.rePassword.message}</Text>
+            )}
+
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholderTextColor="white"
+                  placeholder="Full name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="fullName"
             />
+            {errors.fullName && (
+              <Text style={styles.textError}>This field is required</Text>
+            )}
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+              }}
+              render={({field: {onChange, onBlur, value}}) => (
+                <TextInput
+                  style={styles.textInput}
+                  placeholderTextColor="white"
+                  placeholder="User name"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="userName"
+            />
+            {errors.userName && (
+              <Text style={styles.textError}>This field is required</Text>
+            )}
             <TouchableOpacity
               style={styles.button}
-              onPress={(email, pass) => {}}>
+              onPress={handleSubmit(onSubmit)}>
               <Text style={styles.loginText}>Sign Up</Text>
             </TouchableOpacity>
           </View>
@@ -131,5 +235,9 @@ const styles = StyleSheet.create({
   textFooter: {
     margin: 20,
   },
+  textError: {
+    color: 'red',
+    alignSelf: 'stretch',
+  },
 });
-export default Login;
+export default SignUp;
